@@ -5,14 +5,10 @@
         <meta charset="utf-8" />
         <link rel="stylesheet" type="text/css" href="{{asset('css/app.css')}}">
         <link rel="stylesheet" type="text/css" href="{{asset('css/lib/bootstrap.css')}}">
-        {!!Html::script('js/lib/jquery.js')!!}
-        {!!Html::script('js/lib/bootstrap.js')!!}
-        {!!Html::script('js/lib/angular.js')!!}
-        {!!Html::script('js/app.js')!!}
         <title>Launcher</title>
     </head>
     <body>
-        <div class="container">
+        <div class="container" ng-app="app" ng-controller="LauncherController as launcher">
             <div class="page-header">
                 <h1>AWS AMI Laucher</h1>
             </div>
@@ -23,26 +19,26 @@
                             <h3 class="panel-title">Insert your AWS credentials</h3>
                         </div>
                         <div class="panel-body">
-                            {!! Form::open(['route' => ['launcher.launchAmi'], 'method' => 'post', 'class' => 'form-horizontal']) !!}
-                                <div class="form-group">
+                            <form name="launchForm" class="form-horizontal" ng-submit="launcher.launchAmi(launchForm)">
+                                <div class="form-group" ng-class="{'has-error' : launcher.credentials.accessKey.$invalid}">
                                     <label for="accesKey" class="col-sm-3 control-label">Access Key ID</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control" name="accesKey" placeholder="AWS Access Key" required>
+                                        <input type="text" class="form-control" name="accessKey" placeholder="AWS Access Key" ng-model="launcher.credentials.accessKey" required>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" ng-class="{'has-error' : launcher.credentials.secretKey.$invalid}">
                                     <label for="secretKey" class="col-sm-3 control-label">Secret Key</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control" name="secretKey" placeholder="Secret Access Key" required>
+                                        <input type="text" class="form-control" name="secretKey" placeholder="Secret Access Key" ng-model="launcher.credentials.secretKey" required>
                                     </div>
                                 </div>
 
                                 <div class="form-group">
                                     <div class="col-sm-offset-3 col-sm-9">
-                                        <button type="submit" class="btn btn-primary">Launch!</button>
+                                        <button type="submit" class="btn btn-primary" >Launch!</button>
                                     </div>
                                 </div>
-                            {!! Form::close() !!}
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -53,5 +49,17 @@
                 <p class="text-muted text-center"><small>Jose Ant. Aranda.</small></p>
             </div>
         </footer>
+
+        <script type="text/javascript" src="{{asset('js/lib/jquery.js')}}"></script>
+        <script type="text/javascript" src="{{asset('js/lib/bootstrap.js')}}"></script>
+        <script type="text/javascript" src="{{asset('js/lib/angular.js')}}"></script>
+        <script type="text/javascript" src="{{asset('js/app.js')}}"></script>
+
+        <script type="text/javascript">
+            var launcher = {
+                    urls : {
+                        launchAmi : "{{route('launcher.launchAmi')}}",
+                    }};
+        </script>
     </body>
 </html>
