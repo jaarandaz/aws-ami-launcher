@@ -18,16 +18,18 @@ class LauncherControllerTest extends TestCase
     }
 
     public function testNoCredentials() {
-        $fakeCredentials = [];
+        $noCredentials = [];
 
         $this->json('POST', '/launchAmi', $noCredentials)
-             ->seeJson([
-                 'error' => true,
-             ]);
+             ->seeJsonEquals([
+                'accessKey' => ['The access key field is required.'],
+				'secretKey' => ['The secret key field is required.']
+             ])
+             ->assertResponseStatus(422);
     }
 
     public function testWrongCredentials() {
-        $fakeCredentials = ['accesKey' => 'fakeAccessKey'
+        $fakeCredentials = ['accessKey' => 'fakeAccessKey',
 				'secretKey' => 'fakeSecretKey'];
 
         $this->json('POST', '/launchAmi', $fakeCredentials)
