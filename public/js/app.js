@@ -20,7 +20,7 @@
         var urls = $window.launcher.urls;
 
         this.launchAmi = function(credentials, successCallback, errorCallback) {
-            $http.post(urls.launchAmi, {credentials})
+            $http.post(urls.launchAmi, {})
                 .then(
                     function(response) {
                         console.log("success");
@@ -29,10 +29,7 @@
                         return;
                     },
                     function(response) {
-                        console.log(response);
-                        console.log(response.data['credentials.accessKey']);
-                        console.log(response.data['credentials.secretKey']);
-                        errorCallback(response);
+                        errorCallback(response.data);
                     });
         }
     }
@@ -52,18 +49,30 @@
 
         vm.credentials = {};
 
-        vm.launchAmi = function(launchForm) {
-            launchForm.$setValidity("accessKey", false);
-            
-            /*launcherService.launchAmi(vm.credentials,
-                function() {
-                    console.log("hey controller");
-                },
-                function() {
+        vm.errors = {};
+        vm.thereAreErrors = false;
 
-                    console.log("error handler");
-                });
-            */
+        vm.launchAmi = function(launchForm) {           
+            launcherService.launchAmi(vm.credentials,
+                function() {
+                },
+                function(errors) {
+                    console.log(errors);
+                    if (errors.hasOwnProperty('accessKey')) {
+                        launchForm.$setValidity("accessKey", false);    
+                    }
+                    if (errors.hasOwnProperty('secretKey')) {
+                        launchForm.$setValidity("secretKey", false);
+                    }
+                    showErrors(errors);
+                }
+            );
+        }
+
+
+        function showErrors(errors) {
+            vm.errors = errors;
+            vm.thereAreErrors = true;
         }
     }
 

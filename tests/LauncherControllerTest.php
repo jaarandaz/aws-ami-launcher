@@ -29,8 +29,9 @@ class LauncherControllerTest extends TestCase
     }
 
     public function testWrongCredentials() {
-        $fakeCredentials = ['accessKey' => 'fakeAccessKey',
-				'secretKey' => 'fakeSecretKey'];
+        $fakeCredentials = ["credentials" =>
+        		['accessKey' => 'fakeAccessKey',
+				 'secretKey' => 'fakeSecretKey']];
 
         $this->json('POST', '/launchAmi', $fakeCredentials)
              ->seeJson([

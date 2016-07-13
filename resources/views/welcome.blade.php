@@ -14,7 +14,7 @@
             </div>
             <div class="row">
                 <div class="col-md-8 col-md-offset-2">
-                    <div class="panel panel-default">
+                    <div class="panel panel-default" ng-cloak>
                         <div class="panel-heading">
                             <h3 class="panel-title">Insert your AWS credentials</h3>
                         </div>
@@ -32,7 +32,13 @@
                                         <input type="text" class="form-control" name="secretKey" placeholder="Secret Access Key" ng-model="launcher.credentials.secretKey" required>
                                     </div>
                                 </div>
-
+                                <div class="alert alert-danger ng-hide" ng-show="launcher.thereAreErrors" role="alert">
+                                    <ul>
+                                        <li ng-repeat="(field, message) in launcher.errors">
+                                            @{{message[0]}}
+                                        </li>
+                                    </ul>
+                                </div>
                                 <div class="form-group">
                                     <div class="col-sm-offset-3 col-sm-9">
                                         <button type="submit" class="btn btn-primary" >Launch!</button>
