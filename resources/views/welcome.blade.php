@@ -45,6 +45,8 @@
                                 <div class="form-group">
                                     <div class="col-sm-offset-3 col-sm-9">
                                         <button type="submit" class="btn btn-primary" >Launch!</button>
+                                        <input type="text" class="form-control" ng-model="launcher.ec2Instance.instanceId">
+
                                         <a class="btn btn-default" href="" role="button" ng-click="launcher.instanceStatus()">Chech Status</a>
                                     </div>
                                 </div>
@@ -59,21 +61,34 @@
                         <div class="panel-heading">
                             <h3 class="panel-title">Server Info</h3>
                         </div>
-                        <div class="panel-body">
-                            <ul>
-                                <li>
-                                    @{{launcher.ec2Instance.imageId}}
-                                </li>
-                                <li>
-                                    @{{launcher.ec2Instance.region}}
-                                </li>
-                                <li>
-                                    @{{launcher.ec2Instance.instanceType}}
-                                </li>
-                                <li>
-                                    @{{launcher.ec2Instance.statusName}}
-                                </li>
-                            </ul>
+
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th>Status</th>
+                                        <td>@{{launcher.ec2Instance.statusName}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Public IP</th>
+                                        <td>
+                                            <a ng-href="http://@{{launcher.ec2Instance.publicIp}}" >@{{launcher.ec2Instance.publicIp}}</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Instance Type</th>
+                                        <td>@{{launcher.ec2Instance.instanceType}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Region</th>
+                                        <td>@{{launcher.ec2Instance.region}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Image Id</th>
+                                        <td>@{{launcher.ec2Instance.imageId}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
