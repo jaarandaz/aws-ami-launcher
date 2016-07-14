@@ -15,3 +15,5 @@ bootstrap/cache/
 .rocketeer/
 
 /public/storage
+/bower_components
+/public/storage

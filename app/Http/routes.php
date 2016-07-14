@@ -11,6 +11,19 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'LauncherController@index');
+
+Route::post('launchAmi', [
+		'uses' => 'LauncherController@launchAmi',
+		'as'   => 'launcher.launchAmi'
+	]);
+
+Route::get('instance', [
+		'uses' => 'LauncherController@instance',
+		'as'   => 'launcher.instance'
+	]);
+
+Route::get('instanceStatus', [
+		'uses' => 'LauncherController@instanceStatus',
+		'as'   => 'launcher.instanceStatus'
+	]);
