@@ -5,15 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
-
-use App\Models\Ec2Instance;
+use App\Services\AwsLauncherService;
 
 use Validator;
-use AWS;
 
 use Log;
 
 class LauncherController extends Controller {
+
+    public function __construct(AwsLauncherService $awsLauncher) {
+        $this->awsLauncherService = $awsLauncher;
+    }
 
     public function index() {
         return view('welcome');
@@ -26,49 +28,12 @@ class LauncherController extends Controller {
             return response($validator->messages()->toJson(), 422);
         }
 
-        $instanceData = $this->launchAWSAmi($request['credentials']);
+        $awsLauncherResponse = $this->awsLauncherService->launchInstance($request['credentials']);
 
-        if ($instanceData) {
-            $ec2Instance = new Ec2Instance([
-                    'instanceId'    => $instanceData['InstanceId'],
-                    'imageId'       => $instanceData['ImageId'],
-                    'publicDnsName' => $instanceData['PublicDnsName'],
-                    'instanceType'  => $instanceData['InstanceType'],
-                    'region'        => $instanceData['Placement']['AvailabilityZone'],
-                    'stateCode'     => $instanceData['State']['Code'],
-                    'stateName'     => $instanceData['State']['Name'],
-                ]);
-
-            return response()->json($ec2Instance);
-        }
-    }
-
-    private function launchAWSAmi($credentials) {
-        $credentials = ['credentials' => [
-                'key'    => $credentials['accessKey'],
-                'secret' => $credentials['secretKey']]];
-
-        $ec2Client= AWS::createClient('Ec2', $credentials);
-
-        try {
-            $result = $ec2Client->runInstances(array(
-                'ImageId'        => config('awslauncher.image_id'),
-                'MinCount'       => 1,
-                'MaxCount'       => 1,
-                'InstanceType'   => config('awslauncher.instance_type'),
-            ));
-
-            $instanceData = $result['Instances'][0];
-
-            return $instanceData;
-
-        } catch(\Exception $e) {
-            if (($e->getStatusCode() == "401") && 
-                    ($e->getAwsErrorType() == "client") &&
-                    ($e->getAwsErrorCode() == "AuthFailure")) {
-                Log::error("cocreta");
-            }
-            Log::error($e->getMessage());
+        if ($awsLauncherResponse->isOk()) {
+            return response()->json($awsLauncherResponse->ec2Instance);
+        } else {
+            return response()->json($this->awsValidationError($awsLauncherResponse), 422);
         }
     }
 
@@ -78,4 +43,9 @@ class LauncherController extends Controller {
                 'secretKey' => 'required | string | max:255']);
 	}
 
+    private function awsValidationError($awsLauncherResponse) {
+        return [
+                'secretKey' => [$awsLauncherResponse->errorMessage]
+            ];
+    }
 }

@@ -211,6 +211,7 @@ return [
         'Html' => Collective\Html\HtmlFacade::class,
 
         'AWS' => Aws\Laravel\AwsFacade::class,
+        'AwsLauncher' => AuctionEq\Facades\AwsLaucherFacade::class,
     ],
 
 ];
