@@ -2,6 +2,8 @@
 namespace App\Services;
 
 use App\Models\Ec2Instance;
+use App\Models\Ec2InstanceStatus;
+
 use App\Models\AwsLauncherResponse;
 
 use AWS;
@@ -42,17 +44,15 @@ class AwsLauncherService {
         $ec2Client = $this->initEc2Client($credentials);
 
         try {
-            $result = $ec2Client->describeInstances([
+            $result = $ec2Client->describeInstanceStatus([
                 	'InstanceIds'   => [$instanceId]
             	]);
 
-            $instanceData = $result['Reservations'][0]['Instances'][0];
-
-            Log::error($instanceData);
+            $instanceStatusData = $result['InstanceStatuses'][0];
 
             return new AwsLauncherResponse([
-            		'status'      => AwsLauncherResponse::STATUS_OK,
-            		'ec2Instance' => $this->ec2InstanceFromData($instanceData)]);
+            		'status'            => AwsLauncherResponse::STATUS_OK,
+            		'ec2InstanceStatus' => $this->ec2StatusFromData($instanceStatusData)]);
 
         } catch(\Exception $e) {
         	Log::error($e->getMessage());
@@ -128,6 +128,9 @@ class AwsLauncherService {
     }
 
     private function ec2InstanceFromData($instanceData) {
+    	$instanceStatus = new Ec2InstanceStatus([
+            	'name'           => $instanceData['State']['Name']]);
+
     	return new Ec2Instance([
                     'instanceId'    => $instanceData['InstanceId'],
                     'imageId'       => $instanceData['ImageId'],
@@ -136,9 +139,14 @@ class AwsLauncherService {
                     		$instanceData['PublicIpAddress'] : "",
                     'instanceType'  => $instanceData['InstanceType'],
                     'region'        => $instanceData['Placement']['AvailabilityZone'],
-                    'statusCode'    => $instanceData['State']['Code'],
-                    'statusName'    => $instanceData['State']['Name'],
+                    'status'        => $instanceStatus
                 ]);
     }
 
+    private function ec2StatusFromData($statusData) {
+    	return new Ec2InstanceStatus([
+            	'name'           => $statusData['InstanceState']['Name'],
+            	'instanceStatus' => $statusData['SystemStatus']['Status'],
+            	'systemStatus'   => $statusData['InstanceStatus']['Status']]);
+    }
 }

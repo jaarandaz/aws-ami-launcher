@@ -89,8 +89,8 @@
 
         vm.instanceStatus = function() {
             launcherService.instanceStatus(vm.credentials, vm.ec2Instance,
-                function(ec2Instance) {
-                    vm.ec2Instance = ec2Instance;
+                function(ec2InstanceStatus) {
+                    vm.ec2Instance.status = ec2InstanceStatus;
                 },
                 function(errors) {
                     showErrors(errors);

@@ -50,7 +50,7 @@ class LauncherController extends Controller {
                 ->instanceStatus(json_decode($request['credentials'], self::JSON_TO_ARRAY), $request['instanceId']);
 
         if ($awsLauncherResponse->isOk()) {
-            return response()->json($awsLauncherResponse->ec2Instance);
+            return response()->json($awsLauncherResponse->ec2InstanceStatus);
         } else {
             return response()->json($this->awsValidationError($awsLauncherResponse), self::HTTP_UNPROCESABLE_ENTITY_CODE);
         }

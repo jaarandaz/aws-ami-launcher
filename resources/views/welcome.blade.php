@@ -67,7 +67,7 @@
                                 <tbody>
                                     <tr>
                                         <th>Status</th>
-                                        <td>@{{launcher.ec2Instance.statusName}}</td>
+                                        <td>@{{launcher.ec2Instance.status.name}} (@{{launcher.ec2Instance.status.instanceStatus}}/ @{{launcher.ec2Instance.status.systemStatus}})</td>
                                     </tr>
                                     <tr>
                                         <th>Public IP</th>

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AwsLauncherResponse extends Model {
 
-	protected $fillable = ['status', 'ec2Instance', 'errorMessage'];
+	protected $fillable = ['status', 'ec2Instance', 'errorMessage', 'ec2InstanceStatus'];
 
 	const STATUS_OK = "ok";
 	const STATUS_ERROR = "error";

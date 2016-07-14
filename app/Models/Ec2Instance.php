@@ -13,8 +13,7 @@ class Ec2Instance extends Model {
             'publicIp',
             'instanceType',
             'region',
-            'statusCode',
-            'statusName'
+            'status'
         ];
 
 }
