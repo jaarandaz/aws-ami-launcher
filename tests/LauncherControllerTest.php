@@ -18,7 +18,7 @@ class LauncherControllerTest extends TestCase
     }
 
     public function testNoCredentials() {
-        $noCredentials = [];
+        $noCredentials = ["credentials" =>[]];
 
         $this->json('POST', '/launchAmi', $noCredentials)
              ->seeJsonEquals([
@@ -34,9 +34,10 @@ class LauncherControllerTest extends TestCase
 				 'secretKey' => 'fakeSecretKey']];
 
         $this->json('POST', '/launchAmi', $fakeCredentials)
-             ->seeJson([
-                 'error' => true,
-             ]);
+            ->seeJsonEquals([
+                'authentication' => ['AWS was not able to validate the provided access credentials']
+             ])
+             ->assertResponseStatus(422);
     }
 
 }
