@@ -13,6 +13,9 @@ use Log;
 
 class LauncherController extends Controller {
 
+    const JSON_TO_ARRAY = true;
+    const HTTP_UNPROCESABLE_ENTITY_CODE = 422;
+
     public function __construct(AwsLauncherService $awsLauncher) {
         $this->awsLauncherService = $awsLauncher;
     }
@@ -22,30 +25,59 @@ class LauncherController extends Controller {
     }
 
     public function launchAmi(Request $request){
-        $validator = $this->validateCredentialsNotEmpty($request['credentials']);
-
+        $validator = $this->validateCredentialsNotEmpty($request);
         if ($validator->fails()) {
-            return response($validator->messages()->toJson(), 422);
+            return response($validator->messages()->toJson(), self::HTTP_UNPROCESABLE_ENTITY_CODE);
         }
 
-        $awsLauncherResponse = $this->awsLauncherService->launchInstance($request['credentials']);
+        $awsLauncherResponse = $this->awsLauncherService->
+                launchInstance($request['credentials']);
 
         if ($awsLauncherResponse->isOk()) {
             return response()->json($awsLauncherResponse->ec2Instance);
         } else {
-            return response()->json($this->awsValidationError($awsLauncherResponse), 422);
+            return response()->json($this->awsValidationError($awsLauncherResponse), self::HTTP_UNPROCESABLE_ENTITY_CODE);
         }
     }
 
-    private function validateCredentialsNotEmpty($credentials) {
+    public function instanceStatus(Request $request){
+        $validator = $this->validateCredentialsAndInstanceNotEmpty($request);
+        if ($validator->fails()) {
+            return response($validator->messages()->toJson(), self::HTTP_UNPROCESABLE_ENTITY_CODE);
+        }
+
+        $awsLauncherResponse = $this->awsLauncherService
+                ->instanceStatus(json_decode($request['credentials'], self::JSON_TO_ARRAY), $request['instanceId']);
+
+        if ($awsLauncherResponse->isOk()) {
+            return response()->json($awsLauncherResponse->ec2Instance);
+        } else {
+            return response()->json($this->awsValidationError($awsLauncherResponse), self::HTTP_UNPROCESABLE_ENTITY_CODE);
+        }
+    }
+
+    private function validateCredentialsAndInstanceNotEmpty($request) {
+        $parameters = json_decode($request['credentials'], self::JSON_TO_ARRAY);
+        $parameters['instanceId'] = $request['instanceId'];
+
+        return Validator::make($parameters, [
+                'accessKey' => 'required | string | max:255',
+                'secretKey' => 'required | string | max:255',
+                'instanceId' => 'required | string | max:255']);
+    }
+
+
+    private function validateCredentialsNotEmpty($request) {
+        $credentials = $request['credentials'];
+
         return Validator::make($credentials, [
                 'accessKey'	=> 'required | string | max:255',
                 'secretKey' => 'required | string | max:255']);
-	}
+    }
 
     private function awsValidationError($awsLauncherResponse) {
         return [
-                'secretKey' => [$awsLauncherResponse->errorMessage]
+                'authentication' => [$awsLauncherResponse->errorMessage]
             ];
     }
 }

@@ -33,6 +33,9 @@
                                     </div>
                                 </div>
                                 <div class="alert alert-danger ng-hide" ng-show="launcher.thereAreErrors" role="alert">
+                                    <button type="button" class="close" aria-label="Close" ng-click="launcher.hideErrors()">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
                                     <ul>
                                         <li ng-repeat="(field, message) in launcher.errors">
                                             @{{message[0]}}
@@ -42,6 +45,7 @@
                                 <div class="form-group">
                                     <div class="col-sm-offset-3 col-sm-9">
                                         <button type="submit" class="btn btn-primary" >Launch!</button>
+                                        <a class="btn btn-default" href="" role="button" ng-click="launcher.instanceStatus()">Chech Status</a>
                                     </div>
                                 </div>
                             </form>

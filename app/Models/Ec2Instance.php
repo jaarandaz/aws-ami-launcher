@@ -10,10 +10,11 @@ class Ec2Instance extends Model {
             'instanceId' ,
             'imageId',
             'publicDnsName',
+            'publicIp',
             'instanceType',
             'region',
-            'stateCode',
-            'stateName'
+            'statusCode',
+            'statusName'
         ];
 
 }

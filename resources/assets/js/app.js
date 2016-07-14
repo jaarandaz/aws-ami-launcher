@@ -31,6 +31,23 @@
                         errorCallback(response.data);
                     });
         }
+
+        this.instanceStatus = function(credentials, instance, successCallback, errorCallback) {
+            var params = {credentials : credentials,
+                          instanceId  : instance.instanceId};
+            
+            $http.get(urls.instanceStatus, {params})
+                .then(
+                    function(response) {
+                        console.log("success");
+                        successCallback(response.data);
+                        return;
+                    },
+                    function(response) {
+                        errorCallback(response.data);
+                    });
+        }
+
     }
 
 })();
@@ -52,7 +69,7 @@
         vm.thereAreErrors = false;
 
         vm.launchAmi = function(launchForm) {         
-            hideErrors();
+            vm.hideErrors();
             launcherService.launchAmi(vm.credentials,
                 function(ec2Instance) {
                     vm.ec2Instance = ec2Instance;
@@ -70,15 +87,26 @@
             );
         }
 
+        vm.instanceStatus = function() {
+            launcherService.instanceStatus(vm.credentials, vm.ec2Instance,
+                function(ec2Instance) {
+                    vm.ec2Instance = ec2Instance;
+                },
+                function(errors) {
+                    showErrors(errors);
+                });
+        }
+
+        vm.hideErrors = function() {
+            vm.errors = {};
+            vm.thereAreErrors = false;
+        }
+
         function showErrors(errors) {
             vm.errors = errors;
             vm.thereAreErrors = true;
         }
 
-        function hideErrors() {
-            vm.errors = {};
-            vm.thereAreErrors = false;
-        }
     }
 
 })();
