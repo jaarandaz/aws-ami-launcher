@@ -20,12 +20,11 @@
         var urls = $window.launcher.urls;
 
         this.launchAmi = function(credentials, successCallback, errorCallback) {
-            $http.post(urls.launchAmi, {})
+            $http.post(urls.launchAmi, {credentials})
                 .then(
                     function(response) {
                         console.log("success");
-                        console.log(response);
-                        successCallback(response);
+                        successCallback(response.data);
                         return;
                     },
                     function(response) {
@@ -55,7 +54,8 @@
         vm.launchAmi = function(launchForm) {         
             hideErrors();
             launcherService.launchAmi(vm.credentials,
-                function() {
+                function(ec2Instance) {
+                    vm.ec2Instance = ec2Instance;
                 },
                 function(errors) {
                     console.log(errors);

@@ -15,4 +15,10 @@ Route::get('/', 'LauncherController@index');
 
 Route::post('launchAmi', [
 		'uses' => 'LauncherController@launchAmi',
-		'as'   => 'launcher.launchAmi']);
+		'as'   => 'launcher.launchAmi'
+	]);
+
+Route::get('instanceStatus', [
+		'uses' => 'LauncherController@instanceStatus',
+		'as'   => 'launcher.instanceStatus'
+	]);

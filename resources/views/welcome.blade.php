@@ -12,9 +12,9 @@
             <div class="page-header">
                 <h1>AWS AMI Laucher</h1>
             </div>
-            <div class="row">
+            <div class="row" ng-cloak>
                 <div class="col-md-8 col-md-offset-2">
-                    <div class="panel panel-default" ng-cloak>
+                    <div class="panel panel-default">
                         <div class="panel-heading">
                             <h3 class="panel-title">Insert your AWS credentials</h3>
                         </div>
@@ -29,7 +29,7 @@
                                 <div class="form-group" ng-class="{'has-error' : launcher.credentials.secretKey.$invalid}">
                                     <label for="secretKey" class="col-sm-3 control-label">Secret Key</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control" name="secretKey" placeholder="Secret Access Key" ng-model="launcher.credentials.secretKey" required>
+                                        <input type="password" class="form-control" name="secretKey" placeholder="Secret Access Key" ng-model="launcher.credentials.secretKey" required>
                                     </div>
                                 </div>
                                 <div class="alert alert-danger ng-hide" ng-show="launcher.thereAreErrors" role="alert">
@@ -49,10 +49,35 @@
                     </div>
                 </div>
             </div>
+            <div class="row" ng-cloak>
+                <div class="col-md-8 col-md-offset-2" ng-if="launcher.ec2Instance">
+                    <div class="panel panel-default" >
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Server Info</h3>
+                        </div>
+                        <div class="panel-body">
+                            <ul>
+                                <li>
+                                    @{{launcher.ec2Instance.imageId}}
+                                </li>
+                                <li>
+                                    @{{launcher.ec2Instance.region}}
+                                </li>
+                                <li>
+                                    @{{launcher.ec2Instance.instanceType}}
+                                </li>
+                                <li>
+                                    @{{launcher.ec2Instance.statusName}}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <footer class="footer">
             <div class="container">
-                <p class="text-muted text-center"><small>Jose Ant. Aranda.</small></p>
+                <p class="text-muted text-center"><small>Jose Ant. Aranda</small></p>
             </div>
         </footer>
 
@@ -65,6 +90,7 @@
             var launcher = {
                     urls : {
                         launchAmi : "{{route('launcher.launchAmi')}}",
+                        instanceStatus : "{{route('launcher.instanceStatus')}}"
                     }};
         </script>
     </body>
