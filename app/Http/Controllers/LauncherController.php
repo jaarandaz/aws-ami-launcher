@@ -40,6 +40,22 @@ class LauncherController extends Controller {
         }
     }
 
+    public function instance(Request $request) {
+        $validator = $this->validateCredentialsAndInstanceNotEmpty($request);
+        if ($validator->fails()) {
+            return response($validator->messages()->toJson(), self::HTTP_UNPROCESABLE_ENTITY_CODE);
+        }
+
+        $awsLauncherResponse = $this->awsLauncherService
+                ->getInstance(json_decode($request['credentials'], self::JSON_TO_ARRAY), $request['instanceId']);
+
+        if ($awsLauncherResponse->isOk()) {
+            return response()->json($awsLauncherResponse->ec2Instance);
+        } else {
+            return response()->json($this->awsValidationError($awsLauncherResponse), self::HTTP_UNPROCESABLE_ENTITY_CODE);
+        }
+    }
+
     public function instanceStatus(Request $request){
         $validator = $this->validateCredentialsAndInstanceNotEmpty($request);
         if ($validator->fails()) {

@@ -23,7 +23,6 @@
             $http.post(urls.launchAmi, {credentials})
                 .then(
                     function(response) {
-                        console.log("success");
                         successCallback(response.data);
                         return;
                     },
@@ -32,14 +31,28 @@
                     });
         }
 
-        this.instanceStatus = function(credentials, instance, successCallback, errorCallback) {
+        this.getInstance = function(credentials, instance, successCallback, errorCallback) {
+            var params = {credentials : credentials,
+                          instanceId  : instance.instanceId};
+            
+            $http.get(urls.instance, {params})
+                .then(
+                    function(response) {
+                        successCallback(response.data);
+                        return;
+                    },
+                    function(response) {
+                        errorCallback(response.data);
+                    });
+        }
+
+        this.getInstanceStatus = function(credentials, instance, successCallback, errorCallback) {
             var params = {credentials : credentials,
                           instanceId  : instance.instanceId};
             
             $http.get(urls.instanceStatus, {params})
                 .then(
                     function(response) {
-                        console.log("success");
                         successCallback(response.data);
                         return;
                     },
@@ -58,9 +71,9 @@
         .module('app')
         .controller('LauncherController', LauncherController);
 
-    LauncherController.$inject = ['$scope', 'launcherService'];
+    LauncherController.$inject = ['$scope', '$timeout', 'launcherService'];
 
-    function LauncherController($scope, launcherService) {
+    function LauncherController($scope, $timeout, launcherService) {
         var vm = this;
 
         vm.credentials = {};
@@ -73,6 +86,7 @@
             launcherService.launchAmi(vm.credentials,
                 function(ec2Instance) {
                     vm.ec2Instance = ec2Instance;
+                    keepUpdatingUntilReady();
                 },
                 function(errors) {
                     console.log(errors);
@@ -87,16 +101,6 @@
             );
         }
 
-        vm.instanceStatus = function() {
-            launcherService.instanceStatus(vm.credentials, vm.ec2Instance,
-                function(ec2InstanceStatus) {
-                    vm.ec2Instance.status = ec2InstanceStatus;
-                },
-                function(errors) {
-                    showErrors(errors);
-                });
-        }
-
         vm.hideErrors = function() {
             vm.errors = {};
             vm.thereAreErrors = false;
@@ -105,6 +109,37 @@
         function showErrors(errors) {
             vm.errors = errors;
             vm.thereAreErrors = true;
+        }
+
+        function keepUpdatingUntilReady() {
+            if (vm.ec2Instance.status.name === 'pending') {
+                $timeout(updateInstance, 3000)
+            } else if ((vm.ec2Instance.status.instanceStatus === undefined) || (vm.ec2Instance.status.instanceStatus === 'initializing') || 
+            (vm.ec2Instance.status.instanceStatus === 'initializing')) {
+                $timeout(updateInstanceStatus, 3000)
+            }
+        }
+
+        function updateInstance() {
+            launcherService.getInstance(vm.credentials, vm.ec2Instance,
+                function(ec2Instance) {
+                    vm.ec2Instance = ec2Instance;
+                    keepUpdatingUntilReady();
+                },
+                function(errors) {
+                    showErrors(errors);
+                });
+        }
+
+        function updateInstanceStatus() {
+            launcherService.getInstanceStatus(vm.credentials, vm.ec2Instance,
+                function(ec2InstanceStatus) {
+                    vm.ec2Instance.status = ec2InstanceStatus;
+                    keepUpdatingUntilReady();
+                },
+                function(errors) {
+                    showErrors(errors);
+                });
         }
 
     }

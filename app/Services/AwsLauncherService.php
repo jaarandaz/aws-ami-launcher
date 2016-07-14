@@ -16,10 +16,9 @@ class AwsLauncherService {
 	const EC2_SECURITY_GROUP_DESCRIPTION = "Aws Launcher Security Group";
 
     public function launchInstance($credentials) {
-        $ec2Client = $this->initEc2Client($credentials);
-        $securityGroupId = $this->createSecurityGroup($ec2Client);
-
         try {
+            $ec2Client = $this->initEc2Client($credentials);
+            $securityGroupId = $this->createSecurityGroup($ec2Client);       
 
             $instanceData = $this->launchInstanceCall($ec2Client, $securityGroupId);
 
@@ -40,10 +39,39 @@ class AwsLauncherService {
         }
     }
 
-    public function instanceStatus($credentials, $instanceId){
-        $ec2Client = $this->initEc2Client($credentials);
-
+    public function getInstance($credentials, $instanceId){
         try {
+            $ec2Client = $this->initEc2Client($credentials);
+        
+            $result = $ec2Client->describeInstances([
+                    'InstanceIds'   => [$instanceId]
+                ]);
+
+            $instanceData = $result['Reservations'][0]['Instances'][0];
+
+            return new AwsLauncherResponse([
+                    'status'      => AwsLauncherResponse::STATUS_OK,
+                    'ec2Instance' => $this->ec2InstanceFromData($instanceData)]);
+
+        } catch(\Exception $e) {
+            Log::error($e->getMessage());
+
+            if (($e->getStatusCode() == "401") && 
+                    ($e->getAwsErrorType() == "client") &&
+                    ($e->getAwsErrorCode() == "AuthFailure")) {
+                return new AwsLauncherResponse([
+                        'status'       => AwsLauncherResponse::STATUS_ERROR,
+                        'errorMessage' => 'AWS was not able to validate the provided access credentials']);
+            }
+            
+        }
+    }
+
+
+    public function instanceStatus($credentials, $instanceId){
+        try {
+            $ec2Client = $this->initEc2Client($credentials);
+        
             $result = $ec2Client->describeInstanceStatus([
                 	'InstanceIds'   => [$instanceId]
             	]);

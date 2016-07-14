@@ -109,6 +109,7 @@
             var launcher = {
                     urls : {
                         launchAmi : "{{route('launcher.launchAmi')}}",
+                        instance : "{{route('launcher.instance')}}",
                         instanceStatus : "{{route('launcher.instanceStatus')}}"
                     }};
         </script>
