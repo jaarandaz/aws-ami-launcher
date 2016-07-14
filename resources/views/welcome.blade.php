@@ -44,10 +44,7 @@
                                 </div>
                                 <div class="form-group">
                                     <div class="col-sm-offset-3 col-sm-9">
-                                        <button type="submit" class="btn btn-primary" >Launch!</button>
-                                        <input type="text" class="form-control" ng-model="launcher.ec2Instance.instanceId">
-
-                                        <a class="btn btn-default" href="" role="button" ng-click="launcher.instanceStatus()">Chech Status</a>
+                                        <button type="submit" class="btn btn-primary" ng-disabled="launcher.launchStarted">Launch!</button>
                                     </div>
                                 </div>
                             </form>
@@ -65,26 +62,42 @@
                         <div class="table-responsive">
                             <table class="table">
                                 <tbody>
-                                    <tr>
-                                        <th>Status</th>
-                                        <td>@{{launcher.ec2Instance.status.name}} (@{{launcher.ec2Instance.status.instanceStatus}}/ @{{launcher.ec2Instance.status.systemStatus}})</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Public IP</th>
-                                        <td>
-                                            <a ng-href="http://@{{launcher.ec2Instance.publicIp}}" >@{{launcher.ec2Instance.publicIp}}</a>
+                                    <tr ng-show="!launcher.ec2Instance.isReady()">
+                                        <td colspan="2">
+                                            <div class="progress">
+                                                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="@{{launcher.ec2Instance.percentage()}}" aria-valuemin="0" aria-valuemax="100" style="width: @{{launcher.ec2Instance.percentage()}}%">
+                                                    <span class="sr-only">@{{launcher.ec2Instance.percentage()}}% Complete</span>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
+                                    <tr ng-class="{'danger' : launcher.ec2Instance.isPending(), 
+                                            'warning' : launcher.ec2Instance.isInitializing(),
+                                            'success' : launcher.ec2Instance.isReady()}">
+                                        <th class="text-right">Status</th>
+                                        <td>
+                                                @{{launcher.ec2Instance.status.name}}
+                                                <span ng-if="!launcher.ec2Instance.isPending()">
+                                                    (instance @{{launcher.ec2Instance.status.instanceStatus}}, system @{{launcher.ec2Instance.status.systemStatus}})
+                                                </span>
+                                            </td>
+                                    </tr>
                                     <tr>
-                                        <th>Instance Type</th>
+                                        <th class="text-right">Public IP</th>
+                                        <td>
+                                            <a ng-href="http://@{{launcher.ec2Instance.publicIp}}" target="_blank">@{{launcher.ec2Instance.publicIp}}</a>
+                                        </td class="text-right">
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Instance Type</th>
                                         <td>@{{launcher.ec2Instance.instanceType}}</td>
                                     </tr>
                                     <tr>
-                                        <th>Region</th>
+                                        <th class="text-right">Region</th>
                                         <td>@{{launcher.ec2Instance.region}}</td>
                                     </tr>
                                     <tr>
-                                        <th>Image Id</th>
+                                        <th class="text-right">Image Id</th>
                                         <td>@{{launcher.ec2Instance.imageId}}</td>
                                     </tr>
                                 </tbody>
