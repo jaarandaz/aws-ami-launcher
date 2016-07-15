@@ -26,7 +26,7 @@
         <script type="text/javascript" src="{{asset('js/lib/jquery.js')}}"></script>
         <script type="text/javascript" src="{{asset('js/lib/bootstrap.js')}}"></script>
         <script type="text/javascript" src="{{asset('js/lib/angular.js')}}"></script>
-        <script type="text/javascript" src="{{asset('js/app.js')}}"></script>
+        <script type="text/javascript" src="{{asset('js/all.js')}}"></script>
 
         <script type="text/javascript">
             var launcher = {
