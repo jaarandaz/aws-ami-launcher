@@ -8,11 +8,35 @@
 
 AWS AMI Launcher is a proof of concept to launch (and destroy) an specific AWS AMI using user's AWS credentials. Credentials are kept at front end.
 
+## Installing on Bitnami
+
+If you have a Bitnami LAMP insance you can follow these instrucitons to get the application running:
+
+$> cd apps
+$> sudo git clone https://github.com/jaarandaz/aws-ami-launcher.git
+$> sudo chown -R bitnami aws-ami-launcher
+$> cd aws-ami-launcher
+$> composer install
+$> cp .env.example .env
+$> php artisan key:generate
+$> cd..
+$> sudo chown -R bitnami:daemon aws-ami-launcher
+$> sudo chmod -R g+w aws-ami-launcher/storage
+
+$> sudo su
+#> echo 'Include "/opt/bitnami/apps/aws-ami-launcher/conf/httpd-prefix.conf"' >> /opt/bitnami/apache2/conf/bitnami/bitnami-apps-prefix.conf
+#> echo 'include=/opt/bitnami/apps/aws-ami-launcher/conf/php-fpm/pool.conf' >> /opt/bitnami/php/etc/php-fpm.conf
+#> stack/ctlscript.sh restart
+#> exit
+$>
+
 ## Contributing
 
 Thank you for considering contributing to AWS AMI Launcher!.
 
 ## Security Vulnerabilities
+
+This application should be for local use only.
 
 If you discover a security vulnerability within AWS AMI Launcher, please send me a pull request or post an issue. All security vulnerabilities will be promptly addressed.
 
