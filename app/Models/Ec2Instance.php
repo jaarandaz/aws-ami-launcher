@@ -9,6 +9,7 @@ class Ec2Instance extends Model {
     protected $fillable = [
             'instanceId' ,
             'imageId',
+            'securityGroupId',
             'publicDnsName',
             'publicIp',
             'instanceType',

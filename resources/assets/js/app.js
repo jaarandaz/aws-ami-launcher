@@ -22,19 +22,27 @@
                 },
                 isInitializing : function() {
                     return ((this.status.name === 'running') &&
-                            (this.status.instanceStatus !== 'ok') &&
+                            (this.status.instanceStatus !== 'ok') ||
                             (this.status.systemStatus !== 'ok'));
+                },
+                isShuttingDown : function() {
+                    return (this.status.name === 'shutting-down');
                 },
                 isReady : function() {
                     return ((this.status.name === 'running') &&
                             (this.status.instanceStatus === 'ok') &&
                             (this.status.systemStatus === 'ok'));
                 },
+                isTerminated : function() {
+                    return (this.status.name === 'terminated');
+                },
                 percentage : function() {
                     if (this.isPending()) {
                         return 25;
                     }
-
+                    if (this.isShuttingDown()) {
+                        return 50;
+                    }
                     if (((this.status.instanceStatus === 'initializing') &&
                          (this.status.systemStatus === 'initializing')) ||
                         ((this.status.instanceStatus === undefined) &&
@@ -92,7 +100,9 @@
             $http.get(urls.instance, {params})
                 .then(
                     function(response) {
-                        successCallback(new Ec2Instance(response.data));
+                        var newInstance = new Ec2Instance(response.data);
+                        newInstance.securityGroupId = instance.securityGroupId;
+                        successCallback(newInstance);
                         return;
                     },
                     function(response) {
@@ -107,7 +117,8 @@
             $http.get(urls.instanceStatus, {params})
                 .then(
                     function(response) {
-                        successCallback(response.data);
+                        instance.status = response.data;
+                        successCallback(instance);
                         return;
                     },
                     function(response) {
@@ -115,6 +126,21 @@
                     });
         }
 
+        this.terminateInstance = function(credentials, instance, successCallback, errorCallback) {
+            var params = {credentials     : credentials,
+                          instanceId      : instance.instanceId};
+            
+            $http.post(urls.terminateInstance, params)
+                .then(
+                    function(response) {
+                        instance.status = response.data;
+                        successCallback(instance);
+                        return;
+                    },
+                    function(response) {
+                        errorCallback(response.data);
+                    });
+        }
     }
 
 })();
@@ -131,19 +157,26 @@
         var vm = this;
 
         vm.credentials = {};
+        vm.showCredentials = true;
 
-        vm.launchStarted = false;
+        vm.launching = false;
+        vm.terminating = false;
 
         vm.errors = {};
         vm.thereAreErrors = false;
 
+        $window.onbeforeunload = function(){
+          return 'Are you sure you want to leave?';
+        };
+
         vm.launchAmi = function(launchForm) {         
             vm.hideErrors();
-            vm.launchStarted = true;
+            vm.launching = true;
             launcherService.launchAmi(vm.credentials,
                 function(ec2Instance) {
                     vm.ec2Instance = ec2Instance;
-                    keepUpdatingUntilReady();
+                    vm.showCredentials = false;
+                    keepUpdatingUntilFinalStatus();
                 },
                 function(errors) {
                     console.log(errors);
@@ -153,7 +186,23 @@
                     if (errors.hasOwnProperty('secretKey')) {
                         launchForm.$setValidity("secretKey", false);
                     }
-                    vm.launchStarted = false;
+                    vm.launching = false;
+                    showErrors(errors);
+                }
+            );
+        }
+
+        vm.terminateInstance = function(launchForm) {         
+            vm.hideErrors();
+            vm.terminating = true;
+            launcherService.terminateInstance(vm.credentials, vm.ec2Instance,
+                function(ec2Instance) {
+                    vm.ec2Instance = ec2Instance;
+                    keepUpdatingUntilFinalStatus();
+                },
+                function(errors) {
+                    console.log(errors);
+                    vm.terminating = false;
                     showErrors(errors);
                 }
             );
@@ -164,17 +213,13 @@
             vm.thereAreErrors = false;
         }
 
-        $window.onbeforeunload = function(){
-          return 'Are you sure you want to leave?';
-        };
-
         function showErrors(errors) {
             vm.errors = errors;
             vm.thereAreErrors = true;
         }
 
-        function keepUpdatingUntilReady() {
-            if (vm.ec2Instance.isPending()) {
+        function keepUpdatingUntilFinalStatus() {
+            if (vm.ec2Instance.isPending() || vm.ec2Instance.isShuttingDown()) {
                 $timeout(updateInstance, 3000)
             } else if (vm.ec2Instance.isInitializing()) {
                 $timeout(updateInstanceStatus, 3000)
@@ -185,7 +230,12 @@
             launcherService.getInstance(vm.credentials, vm.ec2Instance,
                 function(ec2Instance) {
                     vm.ec2Instance = ec2Instance;
-                    keepUpdatingUntilReady();
+                    if (vm.ec2Instance.isTerminated()) {
+                        vm.terminating = false;
+                        vm.launching = false;
+                    } else {
+                        keepUpdatingUntilFinalStatus();    
+                    }
                 },
                 function(errors) {
                     showErrors(errors);
@@ -193,14 +243,16 @@
         }
 
         function updateInstanceStatus() {
-            launcherService.getInstanceStatus(vm.credentials, vm.ec2Instance,
-                function(ec2InstanceStatus) {
-                    vm.ec2Instance.status = ec2InstanceStatus;
-                    keepUpdatingUntilReady();
-                },
-                function(errors) {
-                    showErrors(errors);
-                });
+            if (vm.ec2Instance.isInitializing()) {
+                launcherService.getInstanceStatus(vm.credentials, vm.ec2Instance,
+                    function(ec2Instance) {
+                        vm.ec2Instance = ec2Instance;
+                        keepUpdatingUntilFinalStatus();
+                    },
+                    function(errors) {
+                        showErrors(errors);
+                    });
+            }
         }
 
     }

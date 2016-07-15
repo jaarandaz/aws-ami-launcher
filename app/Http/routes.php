@@ -27,3 +27,8 @@ Route::get('instanceStatus', [
 		'uses' => 'LauncherController@instanceStatus',
 		'as'   => 'launcher.instanceStatus'
 	]);
+
+Route::post('terminateInstance', [
+		'uses' => 'LauncherController@terminateInstance',
+		'as'   => 'launcher.terminateInstance'
+	]);
