@@ -36,7 +36,7 @@ $> sudo su
 $>
 ```
 
-Now you should be able to access to the application at `http://$INSTANCE_IP/aws-ami-launcher`
+Now you should be able to access to the application at `https://$INSTANCE_IP/aws-ami-launcher`
 
 ## Contributing
 
