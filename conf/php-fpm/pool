@@ -1,0 +1,6 @@
+[aws-ami-launcher]
+listen=/opt/bitnami/php/var/run/aws-ami-launcher.sock
+include=/opt/bitnami/php/etc/common-ondemand.conf
+include=/home/bitnami/apps/aws-ami-launcher/php-fpm/php-settings.conf
+include=/opt/bitnami/php/etc/environment.conf
+pm=ondemand
