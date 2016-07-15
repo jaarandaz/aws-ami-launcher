@@ -12,6 +12,7 @@ AWS AMI Launcher is a proof of concept to launch (and destroy) an specific AWS A
 
 If you have a Bitnami LAMP insance you can follow these instrucitons to get the application running:
 
+```
 $> cd apps
 $> sudo git clone https://github.com/jaarandaz/aws-ami-launcher.git
 $> sudo chown -R bitnami aws-ami-launcher
@@ -22,13 +23,18 @@ $> php artisan key:generate
 $> cd..
 $> sudo chown -R bitnami:daemon aws-ami-launcher
 $> sudo chmod -R g+w aws-ami-launcher/storage
+```
 
+Now we update Apache and Php-fpm configuration, and restart them:
+
+```
 $> sudo su
 #> echo 'Include "/opt/bitnami/apps/aws-ami-launcher/conf/httpd-prefix.conf"' >> /opt/bitnami/apache2/conf/bitnami/bitnami-apps-prefix.conf
 #> echo 'include=/opt/bitnami/apps/aws-ami-launcher/conf/php-fpm/pool.conf' >> /opt/bitnami/php/etc/php-fpm.conf
 #> stack/ctlscript.sh restart
 #> exit
 $>
+```
 
 ## Contributing
 
