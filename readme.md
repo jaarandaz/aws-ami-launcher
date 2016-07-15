@@ -20,7 +20,7 @@ $> cd aws-ami-launcher
 $> composer install
 $> cp .env.example .env
 $> php artisan key:generate
-$> cd..
+$> cd ..
 $> sudo chown -R bitnami:daemon aws-ami-launcher
 $> sudo chmod -R g+w aws-ami-launcher/storage
 ```
@@ -31,10 +31,12 @@ Now we update Apache and Php-fpm configuration, and restart them:
 $> sudo su
 #> echo 'Include "/opt/bitnami/apps/aws-ami-launcher/conf/httpd-prefix.conf"' >> /opt/bitnami/apache2/conf/bitnami/bitnami-apps-prefix.conf
 #> echo 'include=/opt/bitnami/apps/aws-ami-launcher/conf/php-fpm/pool.conf' >> /opt/bitnami/php/etc/php-fpm.conf
-#> stack/ctlscript.sh restart
+#> /opt/bitnami/ctlscript.sh restart
 #> exit
 $>
 ```
+
+Now you should be able to access to the application at `http://$INSTANCE_IP/aws-ami-launcher`
 
 ## Contributing
 
