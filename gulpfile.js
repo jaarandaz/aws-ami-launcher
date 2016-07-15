@@ -20,9 +20,9 @@ var paths = {
 elixir(function(mix) {
     mix.sass('app.scss')
     	.copy(paths.bootstrap + 'dist/css/bootstrap.css', 'public/css/lib')
-        .copy(paths.bootstrap + 'dist/fonts/**', 'public/fonts/lib')
+        .copy(paths.bootstrap + 'dist/fonts/**', 'public/css/fonts')
         .copy(paths.bootstrap + 'dist/js/bootstrap.js', 'public/js/lib')
         .copy(paths.jquery + 'dist/jquery.js', 'public/js/lib')
         .copy(paths.angular + 'angular.js', 'public/js/lib')
-        .scripts('app.js')
+        .scriptsIn('./resources/assets/js')
 });

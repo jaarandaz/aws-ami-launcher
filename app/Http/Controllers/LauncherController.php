@@ -41,7 +41,7 @@ class LauncherController extends Controller {
     }
 
     public function instance(Request $request) {
-        $validator = $this->validateCredentialsAndInstanceNotEmpty($request);
+        $validator = $this->validateCredentialsAndInstanceNotEmptyJson($request);
         if ($validator->fails()) {
             return response($validator->messages()->toJson(), self::HTTP_UNPROCESABLE_ENTITY_CODE);
         }
@@ -57,7 +57,7 @@ class LauncherController extends Controller {
     }
 
     public function instanceStatus(Request $request){
-        $validator = $this->validateCredentialsAndInstanceNotEmpty($request);
+        $validator = $this->validateCredentialsAndInstanceNotEmptyJson($request);
         if ($validator->fails()) {
             return response($validator->messages()->toJson(), self::HTTP_UNPROCESABLE_ENTITY_CODE);
         }
@@ -72,7 +72,23 @@ class LauncherController extends Controller {
         }
     }
 
-    private function validateCredentialsAndInstanceNotEmpty($request) {
+    public function terminateInstance(Request $request) {
+        $validator = $this->validateCredentialsAndInstanceNotEmpty($request);
+        if ($validator->fails()) {
+            return response($validator->messages()->toJson(), self::HTTP_UNPROCESABLE_ENTITY_CODE);
+        }
+
+        $awsLauncherResponse = $this->awsLauncherService
+                ->terminateInstance($request['credentials'], $request['instanceId']);
+
+        if ($awsLauncherResponse->isOk()) {
+            return response()->json($awsLauncherResponse->ec2InstanceStatus);
+        } else {
+            return response()->json($this->awsValidationError($awsLauncherResponse), self::HTTP_UNPROCESABLE_ENTITY_CODE);
+        }
+    }
+
+    private function validateCredentialsAndInstanceNotEmptyJson($request) {
         $parameters = json_decode($request['credentials'], self::JSON_TO_ARRAY);
         $parameters['instanceId'] = $request['instanceId'];
 
@@ -81,7 +97,6 @@ class LauncherController extends Controller {
                 'secretKey' => 'required | string | max:255',
                 'instanceId' => 'required | string | max:255']);
     }
-
 
     private function validateCredentialsNotEmpty($request) {
         $credentials = $request['credentials'];
@@ -95,5 +110,15 @@ class LauncherController extends Controller {
         return [
                 'authentication' => [$awsLauncherResponse->errorMessage]
             ];
+    }
+
+    private function validateCredentialsAndInstanceNotEmpty($request) {
+        $parameters = $request['credentials'];
+        $parameters['instanceId'] = $request['instanceId'];       
+
+        return Validator::make($parameters, [
+                'accessKey'       => 'required | string | max:255',
+                'secretKey'       => 'required | string | max:255',
+                'instanceId'      => 'required | string | max:255']);
     }
 }
